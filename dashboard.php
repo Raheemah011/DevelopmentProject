@@ -1,79 +1,35 @@
-\<?php
+<?php
 
-$pageTitle = "Dashboard";
-$ShowNavBar = true;
-include "header.php"; //loads header file
+  session_start(); //start session to access session variables
 
-session_start(); //start session to access session variables
+  $pageTitle = "Dashboard";
+  include "header.php"; //loads header file
 
-if (!isset($_SESSION["user_email"])) {
-    header("Location: index.php"); //if it isnt set go back to the log in page
-    exit;
-}
+  include "getuser.php"; //check is theuser is logged in with session variables and see if it exists
+      
 ?>
 
 <body>
-<!--this creates the side bar including logo, menu, logout-->
+
   <div class="container-fluid">
-    
-    
-    <div class="row">
-    
-      <div class="col col-2">
-        <div class="row">
-          <div class="col">
-            <img src="/files/logo.png" style="height:150px" alt="Logo" class="img-fluid ms-2 d-block mb-4">            
-          </div>
-        </div>
         
-        <div class="row">
-          <div class="col">
-            
-            <div class="row mt-3 ms-2">
-              <div class="col">
-                Menu
-              </div>
-            </div>
-
-            <div class="row mt-3 ms-2">
-              <div class="col">
-                Menu
-              </div>
-            </div>
-            
-            <div class="row mt-3 ms-2">
-              <div class="col">
-                Menu
-              </div>
-            </div>
-            
-            <div class="footer row mt-3 ms-2">
-              <div class="col">
-                <a href="../account/logout.php" class="btn btn-danger mt-3">Logout</a>     
-              </div>
-            </div>
-
-
-          </div>        
-        </div>
+    <div class="row">
+      <div class="col-2">
+        <?php include "menu.php"; ?> <!--this creates the side bar including logo, menu, logout-->
       </div>
         
-     <!--main page is 10 columns big-->
-     <!--put cards on to the page using bootstrap - replace placeholders -->
-     <div class="col col-10">
+      <div class="col-10"> <!--main page is 10 columns big-->
      
         <div class="row mt-3 ms-2">
-          <div class="col">
-            <h2>Welcome <?php echo $_SESSION["user_email"]; ?></h2>
-          </div>
+          <?php include "welcomeheader.php"; ?> <!--welcome message with users email-->
         </div>
                
-        <div class="row mt-3 ms-2">
+        <div class="row mt-3 ms-2"> <!--put cards on to the page using bootstrap - replace placeholders -->
           
-          <div class="col col-3">
+          <div class="col-12 col-sm-6 col-md-3 mb-3">
             <div class="card text-center">
               <div class="card-header">
-                Featured
+                Tasks Today
               </div>
               <div class="card-body">
                 <h5 class="card-title">Special title treatment</h5>
@@ -86,27 +42,10 @@ if (!isset($_SESSION["user_email"])) {
             </div>                    
           </div>
 
-          <div class="col col-3">
+          <div class="col-12 col-sm-6 col-md-3 mb-3">
             <div class="card text-center">
               <div class="card-header">
-                Featured
-              </div>
-              <div class="card-body">
-                <h5 class="card-title">Special title treatment</h5>
-                <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                <a href="#" class="btn btn-primary">Go somewhere</a>
-              </div>
-              <div class="card-footer text-body-secondary">
-                2 days ago
-              </div>
-            </div>                    
-          </div>
-        
-
-          <div class="col col-3">
-            <div class="card text-center">
-              <div class="card-header">
-                Featured
+                Habits Today
               </div>
               <div class="card-body">
                 <h5 class="card-title">Special title treatment</h5>
@@ -120,10 +59,27 @@ if (!isset($_SESSION["user_email"])) {
           </div>
         
 
-          <div class="col col-3">
+          <div class="col-12 col-sm-6 col-md-3 mb-3">
             <div class="card text-center">
               <div class="card-header">
-                Featured
+                Best Streak
+              </div>
+              <div class="card-body">
+                <h5 class="card-title">Special title treatment</h5>
+                <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+                <a href="#" class="btn btn-primary">Go somewhere</a>
+              </div>
+              <div class="card-footer text-body-secondary">
+                2 days ago
+              </div>
+            </div>                    
+          </div>
+        
+
+          <div class="col-12 col-sm-6 col-md-3 mb-3">
+            <div class="card text-center">
+              <div class="card-header">
+                Badges Earned
               </div>
               <div class="card-body">
                 <h5 class="card-title">Special title treatment</h5>
@@ -139,12 +95,12 @@ if (!isset($_SESSION["user_email"])) {
         </div>
         
         
-        <div class="row mt-3 ms-2">
+        <div class="row mt-3 ms-2"> <!--the second cards for habit and tasks -->
         
           <div class="col col-sm-6">
             <div class="card text-center">
               <div class="card-header">
-                Featured
+                Todays Tasks
               </div>
               <div class="card-body">
                 <h5 class="card-title">Special title treatment</h5>
@@ -161,7 +117,7 @@ if (!isset($_SESSION["user_email"])) {
           <div class="col col-sm-6">
             <div class="card text-center">
               <div class="card-header">
-                Featured
+                Todays Habits
               </div>
               <div class="card-body">
                 <h5 class="card-title">Special title treatment</h5>
@@ -172,10 +128,10 @@ if (!isset($_SESSION["user_email"])) {
                 2 days ago
               </div>
             </div>                    
-          </div>
+          </div> <!-- todays Habits -->
 
 
-        </div>
+        </div> <!--second cards for habit and tasks -->
                
         
 
@@ -184,11 +140,7 @@ if (!isset($_SESSION["user_email"])) {
     
     </div>
       
-    
-
-
   </div>
-
 
 </body>
 </html>

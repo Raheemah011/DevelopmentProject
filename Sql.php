@@ -13,9 +13,8 @@ $sqlResult = ""; //stores success or error messages
 try {
 
 //delete tthe user table if it already exists reset the database when needed
-    $pdo->exec("DROP TABLE IF EXISTS user");
+    //$pdo->exec("DROP TABLE IF EXISTS user");
 
-    //create the user table if it didnt exist
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS user (
           user_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -27,15 +26,60 @@ try {
         )
     ");
 //display mesaage if works
-    $sqlResult =  "Table created successfully";
+    $sqlResult =  "<br>User table created successfully";
 } catch (PDOException $e) {
-    $sqlResult = "Error: " . $e->getMessage();
+    $sqlResult = "User Error: " . $e->getMessage();
 }
+
+try { //create tasks table and delete if it already exists
+  
+    $pdo->exec("DROP TABLE IF EXISTS task");
+
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS task (
+          user_id INT NOT NULL,
+          task_id INT AUTO_INCREMENT PRIMARY KEY,
+          task_name VARCHAR(255) NOT NULL,
+          task_description VARCHAR(255),
+          task_priority INTEGER NOT NULL,
+          task_duedate DATE NOT NULL,
+          task_completeddate DATE,
+          task_completednotes VARCHAR(255)          
+        )
+    ");
+
+    $sqlResult =  $sqlResult . "<br>Task Table created successfully";
+} catch (PDOException $e) {
+    $sqlResult = $sqlResult . "<br>Task Error: " . $e->getMessage();
+}
+
+try { //create habit table and delete if it exists
+
+    $pdo->exec("DROP TABLE IF EXISTS habit");
+
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS habit (
+          user_id INT NOT NULL,
+          habit_id INT AUTO_INCREMENT PRIMARY KEY,
+          habit_name VARCHAR(255) NOT NULL,
+          habit_description VARCHAR(255)
+        )
+    ");
+
+    $sqlResult =  $sqlResult . "<br>Habit Table created successfully";
+} catch (PDOException $e) {
+    $sqlResult = $sqlResult . "<br>Habit Error: " . $e->getMessage();
+}
+
+
 
 ?>
 
 <div class="alert alert-info">
 <?php echo $sqlResult; ?>
 </div>
+
+<a href="dashboard.php">DashBoard</a>
+
 
 </body>
