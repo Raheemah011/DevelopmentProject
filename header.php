@@ -17,9 +17,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($pageTitle) ?></title>
     
-    <link rel="stylesheet" href="/style.css"> //css file link
+    <link rel="stylesheet" href="/style.css"> <!-- css file link -->
 
-    //link bootstrap files-jquery
+    <!-- link bootstrap files-jquery-->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>    
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>

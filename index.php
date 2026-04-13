@@ -2,7 +2,6 @@
 $pageTitle = "Login";
 include "header.php"; //loads header file
 
-session_start();
 
 $error = ""; //stores error messages
 
@@ -11,7 +10,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //checks if the suer submitted the 
     $password = $_POST["password"]; //and stores them as variables
 
     // simple test login
-    if ($emailaddress === "admin" && $password === "password") {
+    if ($emailaddress === "admin" && $password === "password") {		
+		session_start(); //start session to access session variables
         $_SESSION["user_email"] = $emailaddress; //if the email posted matches the email stored
         header("Location: dashboard.php"); //direct to  the dashboard
         exit();
@@ -65,7 +65,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //checks if the suer submitted the 
               </div>
                        
               <div class="d-grid mt-4 mb-4 text-center">
-                <a href="newpassword.php">Forgotten Password</a>
+                <a href="/account/forgottenpwd.php">Forgotten Password</a>
               </div>
 
               <div class="d-grid">

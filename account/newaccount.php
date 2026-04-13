@@ -56,8 +56,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {//user submits the form
         $age = $difference->y;
 
         if ($age >= 100) {
-          $error = "Date of birth cannot be over 100.";  
-        }    
+         $error = "Date of birth cannot be over 100.";  
+        }
+        if ($age < 12) {
+          $error = "Age must be over 12.";  
+        }  
       }
     }
     
@@ -137,6 +140,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {//user submits the form
     if (age  > 100) { //if age is greater than 100 its invalid
       return false;      
     } 
+    if (age < 12) { //if age is less than 12 its invalid
+      return false;
+    }
     
     return true; // otherwise its true
   }
