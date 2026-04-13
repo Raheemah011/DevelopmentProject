@@ -1,0 +1,4 @@
+.checked-green:checked {
+  background-color: green;
+  border-color: green;
+}

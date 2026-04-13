@@ -243,9 +243,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <input type="password" name="confirmpassword" id="confirmpassword" class="form-control" required value="Raheemah1?">
                 <p class="small"> 
                  Password rules: <br>
-                 8 charchter <br>
-                 8 charchter <br>
-                 8 charchter <br>
+                 8 characters <br>
+                 1 capital letter <br>
+                 1 number <br>
+                 1 symbol <br>
                  </p>
               </div>
               

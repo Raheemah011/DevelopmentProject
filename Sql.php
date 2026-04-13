@@ -44,7 +44,6 @@ try { //create tasks table and delete if it already exists
           task_priority INTEGER NOT NULL,
           task_duedate DATE NOT NULL,
           task_completeddate DATE,
-          task_completednotes VARCHAR(255)          
         )
     ");
 
@@ -63,13 +62,33 @@ try { //create habit table and delete if it exists
           habit_id INT AUTO_INCREMENT PRIMARY KEY,
           habit_name VARCHAR(255) NOT NULL,
           habit_description VARCHAR(255),
-          habit_frequency VARCHAR(12)
+          habit_frequency VARCHAR(12),
+          habit_beststreak INT,
+          habit_currentstreak INT
         )
     ");
 
     $sqlResult =  $sqlResult . "<br>Habit Table created successfully";
 } catch (PDOException $e) {
     $sqlResult = $sqlResult . "<br>Habit Error: " . $e->getMessage();
+}
+
+try { //create habit table and delete if it exists
+
+    $pdo->exec("DROP TABLE IF EXISTS habitlog");
+
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS habitlog (
+          habitlog_id INT AUTO_INCREMENT PRIMARY KEY,
+          user_id INT NOT NULL,
+          habit_id INT NOT NULL,
+          habitlog_date Date NOT NULL
+        )
+    ");
+
+    $sqlResult =  $sqlResult . "<br>Habitlog Table created successfully";
+} catch (PDOException $e) {
+    $sqlResult = $sqlResult . "<br>Habitlog Error: " . $e->getMessage();
 }
 
 
