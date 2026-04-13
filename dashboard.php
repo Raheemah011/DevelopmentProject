@@ -18,7 +18,7 @@
         <?php include "menu.php"; ?> <!--this creates the side bar including logo, menu, logout-->
       </div>
         
-      <div class="col-10"> <!--main page is 10 columns big-->
+      <div class="col-9"> <!--main page is 10 columns big-->
      
         <div class="row mt-3 ms-2">
           <?php include "welcomeheader.php"; ?> <!--welcome message with users email-->
@@ -134,7 +134,6 @@
         </div> <!--second cards for habit and tasks -->
                
         
-
       </div>    
       
     

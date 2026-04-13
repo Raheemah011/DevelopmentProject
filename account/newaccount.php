@@ -5,7 +5,7 @@ include "../header.php";
 $error = "";
 
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {//user submits the form
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
     //read the form data into variables
     $name = $_POST['name'];
@@ -14,7 +14,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {//user submits the form
     $confirmpassword = $_POST['confirmpassword'];
     $dateofbirth = $_POST['dateofbirth'];
 
-    //validate the data, make sure user enters all required information
     if (empty(trim($name))) {
         $error = "Name is required";
     }
@@ -56,13 +55,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {//user submits the form
         $age = $difference->y;
 
         if ($age >= 100) {
-         $error = "Date of birth cannot be over 100.";  
-        }
+          $error = "Date of birth cannot be over 100.";  
+        }    
         if ($age < 12) {
           $error = "Age must be over 12.";  
-        }  
+        }    
+		
       }
-    }
+    } // if (empty($error)) check date of birth
     
     if (empty($error) && $password !== $confirmpassword) {
       $error = "Password and confirm passwords must match.";      
@@ -119,52 +119,54 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {//user submits the form
             $error = "An error occured. Please check your details and try again.";
         }
       }      
-    }
+    } //(empty($error))  so save the data
 }
 ?>
 
 <script>
-  function DOBIsOK(value) { //check if the date of birth is valid
 
-    if (!value) return false; //nothing entered - inbalid
+
+  function DOBIsOK(value) {
+
+    if (!value) return false;
 
     const dob = new Date(value);
-    const today = new Date(); //put into a date object and get todays date
+    const today = new Date();
 
-    if (dob > today) {  //in the future not allowed
+    if (dob > today) {
       return false;
     }
     
-    let age = today.getFullYear() - dob.getFullYear(); //calculate age difference
+    let age = today.getFullYear() - dob.getFullYear();
     
-    if (age  > 100) { //if age is greater than 100 its invalid
+    if (age  > 100) {
       return false;      
     } 
-    if (age < 12) { //if age is less than 12 its invalid
-      return false;
-    }
+    if (age  < 12) {
+      return false;      
+    } 
     
-    return true; // otherwise its true
+    return true;
   }
 
   function validateForm() {
       return true;
       
-      const emailaddress = $("#emailaddress").val().trim(); //gets the email and remove spaces
-      const emailPattern = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/; //regex email format to check its valid
+      const emailaddress = $("#emailaddress").val().trim();
+      const emailPattern = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
       
-      if (!emailPattern.test(emailaddress)) {//if it doesnt match the regex pattern, it stops form sunmission
+      if (!emailPattern.test(emailaddress)) {
           alert("Please enter a valid emailaddress address.");
           return false;
       }
       
       if ($("#password").val() !== $("#confirmpassword").val()) {
-          alert("Passwords do not match.");// if password entered doesnt match the password stored send an error
+          alert("Passwords do not match.");
           return false;            
       }
       
-      const password = $("#password").val().trim(); //remove spaces for the password
-      const passwordPattern = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/; //makes sure password follows rules
+      const password = $("#password").val().trim();
+      const passwordPattern = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
 
       if (!passwordPattern.test(password)) {
           alert("Password must be atleast 8 charachters containing a capital letter, a number and a symbol.");

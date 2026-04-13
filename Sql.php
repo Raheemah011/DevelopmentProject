@@ -33,7 +33,7 @@ try {
 
 try { //create tasks table and delete if it already exists
   
-    $pdo->exec("DROP TABLE IF EXISTS task");
+    //$pdo->exec("DROP TABLE IF EXISTS task");
 
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS task (
@@ -62,7 +62,8 @@ try { //create habit table and delete if it exists
           user_id INT NOT NULL,
           habit_id INT AUTO_INCREMENT PRIMARY KEY,
           habit_name VARCHAR(255) NOT NULL,
-          habit_description VARCHAR(255)
+          habit_description VARCHAR(255),
+          habit_frequency VARCHAR(12)
         )
     ");
 

@@ -1,5 +1,5 @@
 <?php
-$pageTitle = "Password Reset"; //informs users to check their email to reset their password if forgotten
+$pageTitle = "Password Reset";
 include "../header.php";
 ?>
 
@@ -23,7 +23,8 @@ include "../header.php";
           <div class="card-body">
             
             <div class="text-center mb-4">
-              If your details match our system, a new password will be emailed to you. Please check your inbox and junk mail folders.
+              If your details match the information in Striver, a new password will be emailed to you. <br>
+			  Please check your inbox and junk mail folders.
             </div>
 
             <div class="d-grid">

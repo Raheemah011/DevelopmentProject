@@ -17,7 +17,7 @@
         <?php include "menu.php"; ?>
       </div>
         
-      <div class="col-10">  <!-- Col-10 -->
+      <div class="col-9">  <!-- col-9 -->
      
         <div class="row mt-3 ms-2">
           <?php include "welcomeheader.php"; ?>
@@ -27,7 +27,7 @@
           
         </div> <!-- Main Content -->
     
-      </div> <!-- Col-10 -->
+      </div> <!-- col-9 -->
           
     </div> <!-- Main row -->
       
