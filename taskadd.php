@@ -38,7 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
       $task_duedatecheck = new DateTime($task_duedate);
       $today = new DateTime();
 
-      if ($task_duedatecheck < $today) {
+      if ($task_duedatecheck->format('Y-m-d') < $today->format('Y-m-d')) {
          $error = "Task due date cannot be in the past.";  
       }
     }
@@ -133,7 +133,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
                   </div>
               </div>
 
-              <div class="d-grid gap-2 mt-3">
+              <div class="mt-3">
                   <button type="submit" class="btn btn-primary">Save Task</button>
                   <button type="reset" class="btn btn-outline-secondary">Clear</button>
               </div>

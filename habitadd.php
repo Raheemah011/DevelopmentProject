@@ -119,7 +119,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
 
               </div>
 
-              <div class="d-grid gap-2 mt-3">
+              <div class="mt-3">
                   <button type="submit" class="btn btn-primary">Save habit</button>
                   <button type="reset" class="btn btn-outline-secondary">Clear</button>
               </div>

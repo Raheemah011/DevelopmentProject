@@ -37,7 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
     $completeddate = null;
     
     if (empty($task["task_completeddate"])) {
-      //the date must be saved in the correct format - e.g 2026-04-11 so convert it
+      //the date must be saved in the correct format - e.g 2026-04-11 so convert todays date to that format
       $completeddate = date("Y-m-d");
     }
     
@@ -56,12 +56,26 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
 
       
 ?>
+
+<script>
+
+  function submitform(task_id,task_name) {    
+    if (confirm("Are you sure you want to change the task status of " + task_name )) {
+      $('#task_id').val(task_id);
+      $("#mainform").submit();     
+    }
+  }
+  
+</script>
+
 <style>
 .checked-green:checked {
   background-color: green;
   border-color: green;
 }
 </style>
+
+
 <body>
 
   <div class="container-fluid">
@@ -78,7 +92,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
         </div>
                
         <div class="row mt-3 ms-2">
-          <form method="post">
+          <form name=mainform" id="mainform" method="post">
             
             <input type="hidden" name="task_id" id="task_id">
             
@@ -158,7 +172,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
 
                       <!-- The value in the checkbox is the task id so we know which task has been updated. -->
                       <!-- When the task is checked, the hidden field is updated so we can see which task was updated and then the form is submitted. -->
-                      <td><input type="checkbox" class="form-check-input checked-green" <?= $checked ?> onchange="$('#task_id').val('<?= $task['task_id'] ?>');this.form.submit(); "> </td>
+                      <td><input type="checkbox" class="form-check-input checked-green" <?= $checked ?> onchange="submitform('<?= $task['task_id'] ?>', '<?= htmlspecialchars($task['task_name'] ?? '') ?>'); "> </td>
                   </tr>
               <?php endforeach; ?>
                
