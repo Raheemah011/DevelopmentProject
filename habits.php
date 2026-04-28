@@ -6,7 +6,16 @@
 
   include "getuser.php"; //makes $user available in this program 
 
-$todaysdate = date("Y-m-d");
+$todaysDate      = date("Y-m-d");
+$todaysYearMonth = date("Ym"); //Year and month 202604 - lower case m is the month as a number uppercase is like Apr for April
+$todaysYearWeek  = date("oW"); // "oW" is just a way to label a week.
+                               // "W" is the week number, like saying "this is week 17".
+                               // "o" is the year that week really belongs to.
+                               // Sometimes the first few days of January are still part of the
+                               // last week from the previous year, which is a bit confusing.
+                               // So "o" makes sure we use the correct year for that week.
+                               // So "202617", it means week 17 in the year 2026
+          
     
 if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the form 
     
@@ -27,7 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
     $stmt->execute([
         $habit_id,
         $user["user_id"],
-        $todaysdate        
+        $todaysDate        
     ]);
 
     //use fetch to get this one record from the database
@@ -37,16 +46,26 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
     if (empty($habitlog)) {
 
         $stmt = $pdo->prepare("
-            INSERT INTO habitlog (habit_id, user_id, habitlog_date)
-            VALUES (?, ?, ?)
+            INSERT INTO habitlog (habit_id, user_id, habitlog_date, habitlog_yearmonth, habitlog_yearweek)
+            VALUES (?, ?, ?, ?, ?)
         ");
 
         //execute the query
         $stmt->execute([
             $habit_id,
             $user["user_id"],
-            $todaysdate
+            $todaysDate,
+            $todaysYearMonth,
+            $todaysYearWeek
         ]);
+        
+        // now set the streak counters on the habit itself
+        // to do this we need to
+        // 1) Check if teh user has logged a habit in the previous period according to the streak
+        // 2) If they have increase both the current streak and best streak if that is suitable.
+        // 3) if they havent then restart the current streak but leave the best streak as it is.
+        
+        
     }
     
     //it does exist so delete it
@@ -59,7 +78,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
         $stmt->execute([
             $habit_id,
             $user["user_id"],
-            $todaysdate
+            $todaysDate
         ]);
       
     }
@@ -119,7 +138,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
                       <th>Name</th>
                       <th>Description</th>
                       <th>Notes</th>
-                      <th>Done Today</th>
+                      <th>Done</th>
+                      <th>Date Done</th>
                   </tr>
               </thead>
               
@@ -151,20 +171,51 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
                   //the date must be saved in the correct format - e.g 2026-04-11 so convert todays date to that format
                   $checked = "";
                   
-                  $stmt = $pdo->prepare(" 
-                      SELECT * FROM habitlog where user_id = ? and habit_id = ? and habitlog_date = ?
-                  ");
+                  if ($habit["habit_frequency"] == "Daily") {
+                    $stmt = $pdo->prepare(" 
+                        SELECT * FROM habitlog where user_id = ? and habit_id = ? and habitlog_date = ?
+                    ");
+                    //execute the query
+                    $stmt->execute([
+                        $habit["user_id"],
+                        $habit["habit_id"],
+                        $todaysDate                    
+                    ]);
+                  }
+                  else if ($habit["habit_frequency"] == "Weekly") {
+                    $stmt = $pdo->prepare(" 
+                        SELECT * FROM habitlog where user_id = ? and habit_id = ? and habitlog_yearweek = ?
+                    ");
+                    //execute the query
+                    $stmt->execute([
+                        $habit["user_id"],
+                        $habit["habit_id"],
+                        $todaysYearWeek 
+                    ]);
+                  }
+                  else if ($habit["habit_frequency"] == "Monthly") {
+                    $stmt = $pdo->prepare(" 
+                        SELECT * FROM habitlog where user_id = ? and habit_id = ? and habitlog_yearmonth = ?
+                    ");
+                    //execute the query
+                    $stmt->execute([
+                        $habit["user_id"],
+                        $habit["habit_id"],
+                        $todaysYearMonth
+                    ]);
+                  }
 
-                  //execute the query
-                  $stmt->execute([
-                      $habit["user_id"],
-                      $habit["habit_id"],
-                      $todaysdate                    
-                  ]);
 
+                  $habitlog_date = "";
+                  $habitlog_dateFormatted = "";
+                  
                   $habitlog = $stmt->fetch(PDO::FETCH_ASSOC);
                   if (!empty($habitlog)) {
                       $checked = "checked";
+                      
+                      $habitlog_date = new DateTime($habitlog['habitlog_date']);
+                      $habitlog_dateFormatted = $habitlog_date->format("d/m/Y");
+                      
                   }
 
                 ?>
@@ -178,7 +229,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
                       <!-- The value in the checkbox is the habit id so we know which habit has been updated. -->
                       <!-- When the habit is checked, the hidden field is updated so we can see which habit was updated and then the form is submitted. -->
                       <td><input type="checkbox" class="form-check-input checked-green" <?= $checked ?> onchange="submitform('<?= $habit['habit_id'] ?>', '<?= htmlspecialchars($habit['habit_name'] ?? '') ?>'); "> </td>
-       
+                      <td><?= $habitlog_dateFormatted ?></td>
                   </tr>
               <?php endforeach; ?>
                

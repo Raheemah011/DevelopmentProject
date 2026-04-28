@@ -81,7 +81,7 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") { //runs when users comes into the scr
     $habitlogs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     $currentWeek = date('W'); //get the current week - gives a number according to 52 weeks in the year
-    $currentMonth = date('M'); //get the current month - gives a number according to 12 months in the year
+    $currentMonth = date('m'); //get the current month - gives a number according to 12 months in the year
     
     $habitCountToday = 0;
     $habitCountWeek = 0;
@@ -97,7 +97,7 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") { //runs when users comes into the scr
       
       $habitlogDate = $dt->format('Y-m-d');
       $currentHabitWeek = $dt->format('W');
-      $currentHabitMonth = $dt->format('M');
+      $currentHabitMonth = $dt->format('m');
 
       
       if ($habitlog["habit_frequency"] == "Weekly" && $currentWeek == $currentHabitWeek) $habitCountWeekDone = $habitCountWeekDone + 1; 
@@ -137,8 +137,8 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") { //runs when users comes into the scr
   color: green;
 }
 
-rmalPriority {
-  color: yellow;
+.normalPriority {
+  color: orange;
 }
 
 .highPriority {

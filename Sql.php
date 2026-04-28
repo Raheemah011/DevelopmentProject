@@ -43,7 +43,7 @@ try { //create tasks table and delete if it already exists
           task_description VARCHAR(255),
           task_priority INTEGER NOT NULL,
           task_duedate DATE NOT NULL,
-          task_completeddate DATE,
+          task_completeddate DATE
         )
     ");
 
@@ -82,7 +82,9 @@ try { //create habit table and delete if it exists
           habitlog_id INT AUTO_INCREMENT PRIMARY KEY,
           user_id INT NOT NULL,
           habit_id INT NOT NULL,
-          habitlog_date Date NOT NULL
+          habitlog_date Date NOT NULL,
+          habitlog_yearweek  INT NOT NULL,
+          habitlog_yearmonth INT NOT NULL
         )
     ");
 
