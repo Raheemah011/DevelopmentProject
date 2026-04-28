@@ -21,7 +21,7 @@ $todaysYearWeek  = date("oW"); // "oW" is just a way to label a week.
 $previousDate = date("Y-m-d", strtotime("-1 day")); // previous day
 $previousYearMonth = date("Ym", strtotime("first day of last month")); // Previous month 
 $previousYearWeek = date("oW", strtotime("-1 week")); // Previous week 
-$addedOrDeleted = "";
+$addedOrDeleted = ""; //use this to track if i have added or removed a checkmark against the habit
     
 if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the form 
     
@@ -86,12 +86,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
         ]);
       }
 
-
       //use fetch to get this one record from the database
       $habitlog = $stmt->fetch(PDO::FETCH_ASSOC);
 
       //doesnt exist so create it
       if (empty($habitlog)) {
+          //set this so I can tell later if streak needs to be added to
+
           $addedOrDeleted = "ADDED";
           $stmt = $pdo->prepare("
               INSERT INTO habitlog (habit_id, user_id, habitlog_date, habitlog_yearmonth, habitlog_yearweek)
@@ -108,30 +109,60 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
           ]);
       }
       
-      //it does exist so delete it
+      //if habitlog record already exists, then taht means we want to delete it instead as user will have ticked to uncheck it
+      //Cant just delete using the date, have to check the habit frequency and then delete using the correct variables
       if (!empty($habitlog)) { 
+          //set this so I can tell later if streak needs to be reduced
           $addedOrDeleted = "DELETED";
-          $stmt = $pdo->prepare("
-              delete from habitlog where habit_id = ? and user_id = ? and habitlog_date = ?
-          ");
+            
+          if ($habit["habit_frequency"] == "Daily") {
+            $stmt = $pdo->prepare("
+                delete from habitlog where habit_id = ? and user_id = ? and habitlog_date = ?
+            ");
 
-          //execute the query
-          $stmt->execute([
-              $habit_id,
-              $user["user_id"],
-              $todaysDate
-          ]);
+            //execute the query
+            $stmt->execute([
+                $habit_id,
+                $user["user_id"],
+                $todaysDate
+            ]);
+          }
+          else if ($habit["habit_frequency"] == "Weekly") {
+            $stmt = $pdo->prepare("
+                delete from habitlog where habit_id = ? and user_id = ? and habitlog_yearweek = ?
+            ");
+
+            //execute the query
+            $stmt->execute([
+                $habit_id,
+                $user["user_id"],
+                $todaysYearWeek
+            ]);
+          }
+          else  {
+            $stmt = $pdo->prepare("
+                delete from habitlog where habit_id = ? and user_id = ? and habitlog_yearmonth = ?
+            ");
+
+            //execute the query
+            $stmt->execute([
+                $habit_id,
+                $user["user_id"],
+                $todaysYearMonth
+            ]);
+          }
         
       }
       
       // now set the streak counters on the habit itself
-      // to do this we need to
-      // 1) Check if teh user has logged a habit in the previous period according to the streak
-      // 2) If they have increase both the current streak and best streak if that is suitable.
-      // 3) if they havent then restart the current streak but leave the best streak as it is.
+      // to do this:
+      // 1) Check if the user has logged a habit in the previous period according to the frequency
+      // 2) If they have continued the habit (previous exists) then increase both the current streak and best streak if that is suitable.
+      // 3) if they have missed a habit then restart the current streak but leave the best streak as it is.
+      // 4) if the have unchecked an existing habit, then reduce the current streak and best streak if suitable
 
 
-      //need to read the correct habitlog record based on the frequency of the habit, not just todays date as that was a bug
+      //now readd the previous habitlog entry if it exists to check streaks
       if ($habit["habit_frequency"] == "Daily") {
         $stmt = $pdo->prepare(" 
             SELECT * FROM habitlog where user_id = ? and habit_id = ? and habitlog_date = ?
@@ -167,28 +198,32 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
       }
 
 
-      //use fetch to get this one record from the database
-      $habitlogprevious = $stmt->fetch(PDO::FETCH_ASSOC);
+      //use fetch to get this one previous habitlog record from the database
+      $habitlogPrevious = $stmt->fetch(PDO::FETCH_ASSOC);
 
+      //get the current streak counts into variables so they can be amended and then use them to update the habi streaks
       $currentStreak = $habit["habit_currentstreak"];
       $bestStreak = $habit["habit_beststreak"];
 
-      if (empty($currentStreak)) {
+      if (empty($currentStreak)) { //if its null set to 0
         $currentStreak = 0;
       }
 
-      if (empty($bestStreak)) {
+      if (empty($bestStreak)) { //if its null set to 0
         $bestStreak = 0;
       }
       
       //if we added a habit we want to increase the streak counts
       if ($addedOrDeleted == "ADDED") {       
-        if (empty($habitlogprevious)) { //user did not record habit for last period so restart the streak
+        if (empty($habitlogPrevious)) { //user did not record habit for last period so restart the streak
             $currentStreak = 1;
-            $bestStreak = 1;
+            //if never set then set it for first time, bug was setting beststreak to 0 if previos didnt exits everytime!
+            if ($bestStreak == 0) {
+              $bestStreak = 1;
+            }
         }
         
-        else {
+        else { //previous does exist so we can increment it
           $currentStreak = $currentStreak + 1;
           if ($currentStreak  > $bestStreak) {
             $bestStreak = $currentStreak;           
@@ -198,11 +233,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
 
       //if we undid a habit we want to decrease the streak counts but make sure they dont go less than 0
       if ($addedOrDeleted == "DELETED") {       
-         if ($bestStreak == $currentStreak) {
+         if ($bestStreak == $currentStreak) { //if the current streak is also the  best, then we also need to reduce the best streak
            $bestStreak = $bestStreak - 1;
          }
          $currentStreak = $currentStreak - 1;
          
+         //bug - check against negative values!
          if ($currentStreak < 0) {
            $currentStreak = 0;
          }
@@ -213,7 +249,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
     
       }
       
-      
+      //now save the new streak values
       $stmt = $pdo->prepare("
           UPDATE habit 
           SET habit_currentstreak = ?, habit_beststreak = ?
@@ -240,7 +276,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
 
   function submitform(habit_id, habit_name) {    
     if (confirm("Are you sure you want to change the habit status of " + habit_name )) {
+      //set the hidden field habit_id so this can be read and update when the form is submitted
       $('#habit_id').val(habit_id);
+      //submit the form
       $("#mainform").submit();     
     }
   }
@@ -305,19 +343,21 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
                 $stmt->execute([
                     $user["user_id"]
                 ]);
-
+                
+                //get all the habits for this user
                 $habits = $stmt->fetchAll(PDO::FETCH_ASSOC);
                
               ?>
                 
               <?php 
                 
-                
+                //cycle through each habit and see if we have a current habitlog based on the frequency
                 foreach ($habits as $habit): 
               
-                  //the date must be saved in the correct format - e.g 2026-04-11 so convert todays date to that format
+                  //set the checked variable to blank, it will be used to set the checbox to checked if a habit has been logged
                   $checked = "";
                   
+                  //now get correct habitlog according to the frequency on the habitlog
                   if ($habit["habit_frequency"] == "Daily") {
                     $stmt = $pdo->prepare(" 
                         SELECT * FROM habitlog where user_id = ? and habit_id = ? and habitlog_date = ?
@@ -352,12 +392,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
                     ]);
                   }
 
-
+                  //clear the dispay date variables and set if a habit log record is found
                   $habitlog_date = "";
                   $habitlog_dateFormatted = "";
                   
                   $habitlog = $stmt->fetch(PDO::FETCH_ASSOC);
-                  if (!empty($habitlog)) {
+                             
+                  //if a current habitlog exists accoring to the frequency then we can set "checked" and also set the date field so we can show when it was logged
+                  if (!empty($habitlog)) { 
                       $checked = "checked";
                       
                       $habitlog_date = new DateTime($habitlog['habitlog_date']);
