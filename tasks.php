@@ -19,12 +19,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
     
     //prepare SQL query to get the selected task
     $stmt = $pdo->prepare(" 
-        SELECT * FROM task where task_id = ?
+        SELECT * FROM task where task_id = ? and user_id = ?
     ");
 
     //execute the query
     $stmt->execute([
-        $task_id
+        $task_id,
+        $user["user_id"]   
     ]);
 
     //use fetch to get this one record from the database
@@ -79,7 +80,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
 </style>
 
 
-<body onload="loadChart()" >
+<body onload="loadCharts()" >
 
   <div class="container-fluid">
         
@@ -192,8 +193,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
         <div class="col-2">
         </div>
         <div class="col-3">
-          
-          <canvas id="myChart"></canvas>
+          <h2 class="text-center">Tasks To Do</h2>
+          <canvas id="myChartToDo"></canvas>
+        
+        </div>
+        <div class="col-3">
+          <h2 class="text-center">Tasks Done</h2>
+          <canvas id="myChartDone"></canvas>
         
         </div>
       
@@ -205,6 +211,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
 
 
 </body>
+
 
 
   <?php
@@ -221,19 +228,26 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
     //fetch all tasks from the database and store them in an array
     $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    $lowPriority = 0;
-    $mediumPriority = 0;
-    $highPriority = 0;
+    $lowPriorityToDo = 0;
+    $mediumPriorityToDo = 0;
+    $highPriorityToDo = 0;
+    
+    $lowPriorityDone = 0;
+    $mediumPriorityDone = 0;
+    $highPriorityDone = 0;
     
     foreach ($tasks as $task): //this runs through every task in our returned data
      if ($task['task_priority'] == "1") {
-       $lowPriority = $lowPriority + 1;
+       if (empty($task["task_completeddate"])) $lowPriorityToDo = $lowPriorityToDo + 1;
+       else $lowPriorityDone = $lowPriorityDone + 1;
      }
      else if ($task['task_priority'] == "2") {
-       $mediumPriority = $mediumPriority + 1;
+       if (empty($task["task_completeddate"])) $mediumPriorityToDo = $mediumPriorityToDo + 1;
+       else $mediumPriorityDone = $mediumPriorityDone + 1;
      }
      else {
-       $highPriority = $highPriority + 1;
+       if (empty($task["task_completeddate"])) $highPriorityToDo = $highPriorityToDo + 1;
+       else $highPriorityDone = $highPriorityDone + 1;
      }
 
     endforeach;
@@ -249,24 +263,42 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
     }
   }
  
-  function loadChart() {
+  function loadCharts() {
 
-    const arrayLabels = ["Low", "Medium", "High"];
-    const arrayValues = [<?php echo $lowPriority?>, <?php echo $mediumPriority?>, <?php echo $highPriority?>];
-    const ctx = document.getElementById('myChart');
+    const arrayLabelsToDo = ["Low", "Medium", "High"];
+    const arrayValuesToDo = [<?php echo $lowPriorityToDo?>, <?php echo $mediumPriorityToDo?>, <?php echo $highPriorityToDo?>];
+    const ctxToDo = document.getElementById('myChartToDo');
 
-    new Chart(ctx, {
+    new Chart(ctxToDo, {
       type: 'pie',
       data: {
-        labels: arrayLabels,
+        labels: arrayLabelsToDo,
         datasets: [{
           label: 'Task Priorites',
-          data: arrayValues,
+          data: arrayValuesToDo,
           backgroundColor: ["green", "orange", "red"],
           borderWidth: 1
         }]
       }
     });
+    
+    const arrayLabelsDone = ["Low", "Medium", "High"];
+    const arrayValuesDone = [<?php echo $lowPriorityDone?>, <?php echo $mediumPriorityDone?>, <?php echo $highPriorityDone?>];
+    const ctxDone = document.getElementById('myChartDone');
+
+    new Chart(ctxDone, {
+      type: 'pie',
+      data: {
+        labels: arrayLabelsDone,
+        datasets: [{
+          label: 'Task Priorites',
+          data: arrayValuesDone,
+          backgroundColor: ["green", "orange", "red"],
+          borderWidth: 1
+        }]
+      }
+    });
+    
   }
 </script>
 

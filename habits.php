@@ -294,7 +294,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
 </style>
 
 
-<body onload="loadChart()">
+<body onload="loadCharts()">
 
   <div class="container-fluid">
         
@@ -335,6 +335,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
               
               <?php 
 
+                $habitsDailyDone = 0;
+                $habitsWeeklyDone = 0;
+                $habitsMonthlyDone = 0;
+                
+                $habitsDailyToDo = 0;
+                $habitsWeeklyToDo = 0;
+                $habitsMonthlyToDo = 0;
+                
                 $stmt = $pdo->prepare(" 
                     SELECT * FROM habit where user_id = ?
                 ");
@@ -347,10 +355,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
                 //get all the habits for this user
                 $habits = $stmt->fetchAll(PDO::FETCH_ASSOC);
                
-              ?>
-                
-              <?php 
-                
                 //cycle through each habit and see if we have a current habitlog based on the frequency
                 foreach ($habits as $habit): 
               
@@ -400,11 +404,32 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
                              
                   //if a current habitlog exists accoring to the frequency then we can set "checked" and also set the date field so we can show when it was logged
                   if (!empty($habitlog)) { 
+                      
                       $checked = "checked";
                       
                       $habitlog_date = new DateTime($habitlog['habitlog_date']);
                       $habitlog_dateFormatted = $habitlog_date->format("d/m/Y");
                       
+                      if ($habit["habit_frequency"] == "Daily") {
+                        $habitsDailyDone = $habitsDailyDone + 1;                        
+                      }
+                      else if ($habit["habit_frequency"] == "Weekly") {
+                        $habitsWeeklyDone = $habitsWeeklyDone + 1;
+                      }
+                      else {
+                        $habitsMonthlyDone = $habitsMonthlyDone + 1;
+                      }                        
+                  }
+                  else { //habit has not been done for this frequency
+                      if ($habit["habit_frequency"] == "Daily") {
+                        $habitsDailyToDo = $habitsDailyToDo + 1;                        
+                      }
+                      else if ($habit["habit_frequency"] == "Weekly") {
+                        $habitsWeeklyToDo = $habitsWeeklyToDo + 1;
+                      }
+                      else {
+                        $habitsMonthlyToDo = $habitsMonthlyToDo + 1;
+                      }                        
                   }
 
                 ?>
@@ -436,10 +461,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
       <div class="row">
         <div class="col-2">
         </div>
+     
         <div class="col-3">
-          
-          <canvas id="myChart"></canvas>
-        
+          <h2 class="text-center">Habits Daily</h2>
+          <canvas id="myChartDaily"></canvas>
+        </div>
+   
+        <div class="col-3">
+          <h2 class="text-center">Habits Weekly</h2>
+          <canvas id="myChartWeekly"></canvas>        
+        </div>
+
+        <div class="col-3">
+          <h2 class="text-center">Habits Monthly</h2>
+          <canvas id="myChartMonthly"></canvas>        
         </div>
       
       </div>          
@@ -450,60 +485,64 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
 
 </body>
 
-
-  <?php
-    //prepare SQL query to get all tasks for the logged in user
-    $stmt = $pdo->prepare(" 
-        SELECT * FROM task where user_id = ?
-    ");
-
-    //execute the query using the logged in users id
-    $stmt->execute([
-        $user["user_id"]
-    ]);
-
-    //fetch all tasks from the database and store them in an array
-    $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    $lowPriority = 0;
-    $mediumPriority = 0;
-    $highPriority = 0;
-    
-    foreach ($tasks as $task): //this runs through every task in our returned data
-     if ($task['task_priority'] == "1") {
-       $lowPriority = $lowPriority + 1;
-     }
-     else if ($task['task_priority'] == "2") {
-       $mediumPriority = $mediumPriority + 1;
-     }
-     else {
-       $highPriority = $highPriority + 1;
-     }
-
-    endforeach;
-  ?>
-
-
 <script>
      
-  function loadChart() {
+  function loadCharts() {
 
-    const arrayLabels = ["Low", "Medium", "High"];
-    const arrayValues = [<?php echo $lowPriority?>, <?php echo $mediumPriority?>, <?php echo $highPriority?>];
-    const ctx = document.getElementById('myChart');
+    const arrayLabelsDaily = ["Done", "To Do"];
+    const arrayValuesDaily = [<?php echo $habitsDailyDone?>, <?php echo $habitsDailyToDo?>];
+    const ctxDaily = document.getElementById('myChartDaily');
 
-    new Chart(ctx, {
+    new Chart(ctxDaily, {
       type: 'pie',
       data: {
-        labels: arrayLabels,
+        labels: arrayLabelsDaily,
         datasets: [{
-          label: 'Task Priorites',
-          data: arrayValues,
-          backgroundColor: ["green", "orange", "red"],
+          label: 'Habits Daily',
+          data: arrayValuesDaily,
+          backgroundColor: ["green", "orange"],
           borderWidth: 1
         }]
       }
     });
+
+
+    const arrayLabelsWeekly = ["Done", "To Do"];
+    const arrayValuesWeekly = [<?php echo $habitsWeeklyDone?>, <?php echo $habitsWeeklyToDo?>];
+    const ctxWeekly = document.getElementById('myChartWeekly');
+
+    new Chart(ctxWeekly, {
+      type: 'pie',
+      data: {
+        labels: arrayLabelsWeekly,
+        datasets: [{
+          label: 'Habits Weekly',
+          data: arrayValuesWeekly,
+          backgroundColor: ["green", "orange"],
+          borderWidth: 1
+        }]
+      }
+    });
+
+
+    const arrayLabelsMonthly = ["Done", "To Do"];
+    const arrayValuesMonthly = [<?php echo $habitsMonthlyDone?>, <?php echo $habitsMonthlyToDo?>];
+    const ctxMonthly = document.getElementById('myChartMonthly');
+
+    new Chart(ctxMonthly, {
+      type: 'pie',
+      data: {
+        labels: arrayLabelsMonthly,
+        datasets: [{
+          label: 'Habits Monthly',
+          data: arrayValuesMonthly,
+          backgroundColor: ["green", "orange"],
+          borderWidth: 1
+        }]
+      }
+    });
+
+    
   }
 </script>
 

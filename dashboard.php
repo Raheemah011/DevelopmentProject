@@ -34,12 +34,13 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") { //runs when users comes into the scr
        
     //prepare SQL query to get todays tasks
     $stmt = $pdo->prepare(" 
-        SELECT * FROM task where task_duedate = ?
+        SELECT * FROM task where task_duedate = ? and user_id = ?
     ");
 
     //execute the query
     $stmt->execute([
-        $todaysDate
+        $todaysDate,
+        $user["user_id"]
     ]);
 
     //use fetch to get this one record from the database
@@ -81,12 +82,14 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") { //runs when users comes into the scr
       JOIN habit ON habitlog.habit_id = habit.habit_id
       WHERE habitlog.habitlog_date >= ?
         AND habitlog.habitlog_date <= ?        
+        AND habitlog.user_id = ?
     ");
 
     //execute the query
     $stmt->execute([
         $startOfMonth,
-        $endOfMonth
+        $endOfMonth,
+        $user["user_id"]
     ]);
 
     
@@ -122,11 +125,13 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") { //runs when users comes into the scr
     
     //prepare SQL query to get todays tasks
     $stmt = $pdo->prepare(" 
-      SELECT * from habit
+      SELECT * from habit where user_id = ?
     ");
 
     //execute the query
-    $stmt->execute();
+    $stmt->execute([
+      $user["user_id"]
+    ]);
     
     //use fetch to get this one record from the database
     $habits = $stmt->fetchAll(PDO::FETCH_ASSOC);

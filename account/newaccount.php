@@ -70,7 +70,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     //check password matches the rules
     if (empty($error) && !preg_match('/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/', $password)) {
-      $error = "Password must be atleast 8 charachters containing a capital letter, a number and a symbol.";      
+      $error = "Password must be atleast 8 characters containing a capital letter, a number and a symbol.";      
     }
     
     //if no error is recorded then create the user
