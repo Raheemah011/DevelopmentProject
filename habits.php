@@ -446,6 +446,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
                       <td><?= $habitlog_dateFormatted ?></td>
                       <td><?= htmlspecialchars($habit['habit_currentstreak']  ?? '') ?></td>
                       <td><?= htmlspecialchars($habit['habit_beststreak']  ?? '') ?></td>
+                      <td><a href="\habitadd.php?habit_id=<?= $habit['habit_id'] ?>">Edit</a></td>
+
                   </tr>
               <?php endforeach; ?>
                

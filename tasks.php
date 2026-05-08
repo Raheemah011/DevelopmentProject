@@ -111,6 +111,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
                       <th>Due Date</th>
                       <th>Done</th>
                       <th>Completed On</th>
+                      <th></th>
                   </tr>
               </thead>
               
@@ -178,6 +179,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
                       <!-- When the task is checked, the hidden field is updated so we can see which task was updated and then the form is submitted. -->
                       <td><input type="checkbox" class="form-check-input checked-green" <?= $checked ?> onchange="submitform('<?= $task['task_id'] ?>', '<?= htmlspecialchars($task['task_name'] ?? '') ?>'); "> </td>
                       <td><?= $checkeddateformatted ?></td>
+                      <td><a href="\taskadd.php?task_id=<?= $task['task_id'] ?>">Edit</a></td>
                   </tr>
               <?php endforeach; ?>
                
