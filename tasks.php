@@ -57,26 +57,29 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
       
 ?>
 
-<script>
-
-  function submitform(task_id,task_name) {    
-    if (confirm("Are you sure you want to change the task status of " + task_name )) {
-      $('#task_id').val(task_id);
-      $("#mainform").submit();     
-    }
-  }
-  
-</script>
 
 <style>
 .checked-green:checked {
   background-color: green;
   border-color: green;
 }
+
+.lowPriority {
+  color: green;
+}
+
+.mediumPriority {
+  color: orange;
+}
+
+.highPriority {
+  color: red;
+}
+
 </style>
 
 
-<body>
+<body onload="loadChart()" >
 
   <div class="container-fluid">
         
@@ -137,13 +140,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
                   
                   if (!empty($task['task_priority'])) {
                       if ($task['task_priority'] == "1") { 
-                        $priorityformatted = "Low" ;
+                        $priorityformatted = "<span class='lowPriority'>Low</span>" ;
                       }
                       else if ($task['task_priority'] == "2") { 
-                        $priorityformatted = "Medium";
+                        $priorityformatted = "<span class='mediumPriority'>Medium</span>";
                       }
                       else if ($task['task_priority'] == "3") {
-                        $priorityformatted = "High";
+                        $priorityformatted = "<span class='highPriority'>High<span>";
                       }
                   } 
                   
@@ -183,13 +186,88 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
           </form>
           
         </div>
-    
       </div> <!-- col-9 -->
           
+      <div class="row">
+        <div class="col-2">
+        </div>
+        <div class="col-3">
+          
+          <canvas id="myChart"></canvas>
+        
+        </div>
+      
+      </div>
+      
     </div> <!-- Main row -->
       
   </div> <!-- container-fluid -->
 
 
 </body>
+
+
+  <?php
+    //prepare SQL query to get all tasks for the logged in user
+    $stmt = $pdo->prepare(" 
+        SELECT * FROM task where user_id = ?
+    ");
+
+    //execute the query using the logged in users id
+    $stmt->execute([
+        $user["user_id"]
+    ]);
+
+    //fetch all tasks from the database and store them in an array
+    $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $lowPriority = 0;
+    $mediumPriority = 0;
+    $highPriority = 0;
+    
+    foreach ($tasks as $task): //this runs through every task in our returned data
+     if ($task['task_priority'] == "1") {
+       $lowPriority = $lowPriority + 1;
+     }
+     else if ($task['task_priority'] == "2") {
+       $mediumPriority = $mediumPriority + 1;
+     }
+     else {
+       $highPriority = $highPriority + 1;
+     }
+
+    endforeach;
+  ?>
+
+
+<script>
+     
+  function submitform(task_id,task_name) {    
+    if (confirm("Are you sure you want to change the task status of " + task_name )) {
+      $('#task_id').val(task_id);
+      $("#mainform").submit();     
+    }
+  }
+ 
+  function loadChart() {
+
+    const arrayLabels = ["Low", "Medium", "High"];
+    const arrayValues = [<?php echo $lowPriority?>, <?php echo $mediumPriority?>, <?php echo $highPriority?>];
+    const ctx = document.getElementById('myChart');
+
+    new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: arrayLabels,
+        datasets: [{
+          label: 'Task Priorites',
+          data: arrayValues,
+          backgroundColor: ["green", "orange", "red"],
+          borderWidth: 1
+        }]
+      }
+    });
+  }
+</script>
+
 </html>

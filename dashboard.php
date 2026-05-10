@@ -16,6 +16,19 @@
   $taskCountTodayMediumDone = 0;
   $taskCountTodayHighDone = 0;
   $taskDone = false;
+
+
+
+$todaysDate      = date("Y-m-d");
+$todaysYearMonth = date("Ym"); //Year and month 202604 - lower case m is the month as a number uppercase is like Apr for April
+$todaysYearWeek  = date("oW"); // "oW" is just a way to label a week.
+                               // "W" is the week number, like saying "this is week 17".
+                               // "o" is the year that week really belongs to.
+                               // Sometimes the first few days of January are still part of the
+                               // last week from the previous year, which is a bit confusing.
+                               // So "o" makes sure we use the correct year for that week.
+                               // So "202617", it means week 17 in the year 2026
+
     
 if ($_SERVER["REQUEST_METHOD"] === "GET") { //runs when users comes into the screen
        
@@ -137,7 +150,7 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") { //runs when users comes into the scr
   color: green;
 }
 
-.normalPriority {
+.mediumPriority {
   color: orange;
 }
 
@@ -166,7 +179,7 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") { //runs when users comes into the scr
                
         <div class="row mt-3 ms-2"> <!--put cards on to the page using bootstrap - replace placeholders -->
           
-          <div class="col-12 col-sm-6 col-md-3 mb-3">
+          <div class="col-12 col-sm-6 col-md-4 mb-3">
             <div class="card text-center">
               <div class="card-header">
                 <span class="lowPriority">Low</span> <br>Tasks Today
@@ -181,10 +194,10 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") { //runs when users comes into the scr
             </div>                    
           </div>
 
-          <div class="col-12 col-sm-6 col-md-3 mb-3">
+          <div class="col-12 col-sm-6 col-md-4 mb-3">
             <div class="card text-center">
               <div class="card-header">
-                <span class="normalPriority">Medium</span> <br>Tasks Today
+                <span class="mediumPriority">Medium</span> <br>Tasks Today
               </div>
               <div class="card-body">
                 <h5 class="card-title"></h5>
@@ -196,7 +209,7 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") { //runs when users comes into the scr
             </div>                    
           </div>
 
-          <div class="col-12 col-sm-6 col-md-3 mb-3">
+          <div class="col-12 col-sm-6 col-md-4 mb-3">
             <div class="card text-center">
               <div class="card-header">
                 <span class="highPriority">High</span> <br>Tasks Today
@@ -216,7 +229,7 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") { //runs when users comes into the scr
 
         <div class="row mt-3 ms-2"> <!--put cards on to the page using bootstrap - replace placeholders -->
           
-          <div class="col-12 col-sm-6 col-md-3 mb-3">
+          <div class="col-12 col-sm-6 col-md-4 mb-3">
             <div class="card text-center">
               <div class="card-header">
                 Today's Habits
@@ -231,7 +244,7 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") { //runs when users comes into the scr
             </div>                    
           </div>
 
-          <div class="col-12 col-sm-6 col-md-3 mb-3">
+          <div class="col-12 col-sm-6 col-md-4 mb-3">
             <div class="card text-center">
               <div class="card-header">
                 Weekly Habits
@@ -246,7 +259,7 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") { //runs when users comes into the scr
             </div>                    
           </div>
 
-          <div class="col-12 col-sm-6 col-md-3 mb-3">
+          <div class="col-12 col-sm-6 col-md-4 mb-3">
             <div class="card text-center">
               <div class="card-header">
                 Monthly Habits
@@ -269,15 +282,87 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") { //runs when users comes into the scr
           <div class="col col-sm-6">
             <div class="card text-center">
               <div class="card-header">
-                Todays Tasks
+                Incomplete Tasks
               </div>
               <div class="card-body">
-                <h5 class="card-title">Special title treatment</h5>
-                <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                <a href="#" class="btn btn-primary">Go somewhere</a>
-              </div>
-              <div class="card-footer text-body-secondary">
-                2 days ago
+
+
+                 <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Priority</th>
+                            <th>Due Date</th>
+                        </tr>
+                    </thead>
+                    
+                    <tbody>
+                    
+                    <?php 
+                        
+                      //prepare SQL query to get all tasks for the logged in user
+                      $stmt = $pdo->prepare(" 
+                          SELECT * FROM task where user_id = ? and task_completeddate is null order by task_duedate, task_priority desc
+                      ");
+
+                      //execute the query using the logged in users id
+                      $stmt->execute([
+                          $user["user_id"]
+                      ]);
+                      
+                      //fetch all tasks from the database and store them in an array
+                      $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                      
+                    ?>
+                    
+                    <?php foreach ($tasks as $task): //this runs through every task in our returned data
+                       
+                        $checkeddateformatted = "";
+                        $duedateformatted = ""; 
+                        $priorityformatted = ""; 
+                        
+                                                                     
+                        if (!empty($task['task_priority'])) {
+                            if ($task['task_priority'] == "1") { 
+                              $priorityformatted = "<span class='lowPriority'>Low</span>" ;
+                            }
+                            else if ($task['task_priority'] == "2") { 
+                              $priorityformatted = "<span class='mediumPriority'>Medium</span>";
+                            }
+                            else if ($task['task_priority'] == "3") {
+                              $priorityformatted = "<span class='highPriority'>High</span>";
+                            }
+                        } 
+                        
+                        if (!empty($task['task_duedate'])) {
+                            //convert the database field to a date variable so we can show this in dd/mm/yyyy format
+                            $duedate = new DateTime($task['task_duedate']);
+                            $duedateformatted = $duedate->format("d/m/Y");
+                        } 
+                        
+                        
+                        if (!empty($task['task_completeddate'])) {
+                            $checkedate = new DateTime($task['task_completeddate']);
+                            $checkeddateformatted = $checkedate->format("d/m/Y");
+                        } 
+                        
+                        //add variable that we set the "checked" if the task has a completed date and we can use that to set the checkbox status to checked
+                        $checked = "";
+                        if (!empty($task['task_completeddate'])) $checked = "checked";
+                    ?>
+                        <tr>
+                            <td><?= htmlspecialchars($task['task_name'] ?? '') ?></td>
+                            <td><?= htmlspecialchars($task['task_description']  ?? '') ?></td>
+                            <td><?= $priorityformatted ?></td>
+                            <!-- The dates are shown in the correct format instead of e.g 2026-04-11 -->
+                            <td><?= $duedateformatted ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                     
+                    </tbody>
+                  </table>
+       
               </div>
             </div>                    
           </div>
@@ -286,15 +371,103 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") { //runs when users comes into the scr
           <div class="col col-sm-6">
             <div class="card text-center">
               <div class="card-header">
-                Todays Habits
+                 Incomplete Habits 
               </div>
               <div class="card-body">
-                <h5 class="card-title">Special title treatment</h5>
-                <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                <a href="#" class="btn btn-primary">Go somewhere</a>
-              </div>
-              <div class="card-footer text-body-secondary">
-                2 days ago
+
+                <table class="table table-bordered table-striped">
+                  <thead>
+                      <tr>
+                          <th>Name</th>
+                          <th>Description</th>
+                          <th>Notes</th>
+                          <th>Current</th>
+                      </tr>
+                  </thead>
+                  
+                  <tbody>
+                  
+                  <?php 
+
+                    $stmt = $pdo->prepare(" 
+                        SELECT * FROM habit where user_id = ?
+                    ");
+
+                    //execute the query
+                    $stmt->execute([
+                        $user["user_id"]
+                    ]);
+                    
+                    //get all the habits for this user
+                    $habits = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                   
+                  ?>
+                    
+                  <?php 
+                    
+                    //cycle through each habit and see if we have a current habitlog based on the frequency
+                    foreach ($habits as $habit): 
+                  
+                      //set the checked variable to blank, it will be used to set the checbox to checked if a habit has been logged
+                      $checked = "";
+                      
+                      //now get correct habitlog according to the frequency on the habitlog
+                      if ($habit["habit_frequency"] == "Daily") {
+                        $stmt = $pdo->prepare(" 
+                            SELECT * FROM habitlog where user_id = ? and habit_id = ? and habitlog_date = ?
+                        ");
+                        //execute the query
+                        $stmt->execute([
+                            $habit["user_id"],
+                            $habit["habit_id"],
+                            $todaysDate                    
+                        ]);
+                      }
+                      else if ($habit["habit_frequency"] == "Weekly") {
+                        $stmt = $pdo->prepare(" 
+                            SELECT * FROM habitlog where user_id = ? and habit_id = ? and habitlog_yearweek = ?
+                        ");
+                        //execute the query
+                        $stmt->execute([
+                            $habit["user_id"],
+                            $habit["habit_id"],
+                            $todaysYearWeek 
+                        ]);
+                      }
+                      else if ($habit["habit_frequency"] == "Monthly") {
+                        $stmt = $pdo->prepare(" 
+                            SELECT * FROM habitlog where user_id = ? and habit_id = ? and habitlog_yearmonth = ?
+                        ");
+                        //execute the query
+                        $stmt->execute([
+                            $habit["user_id"],
+                            $habit["habit_id"],
+                            $todaysYearMonth
+                        ]);
+                      }
+
+                      $habitlog = $stmt->fetch(PDO::FETCH_ASSOC);
+                                 
+                      //if a current habitlog exists accoring to the frequency then we it means the user logged this habit, so we can 
+                      //skip to the next cycle in the for each loop by doing continue
+                      if (!empty($habitlog)) continue;
+
+                    ?>
+                      
+                      
+                      <tr>
+                          <td><?= htmlspecialchars($habit['habit_name'] ?? '') ?></td>
+                          <td><?= htmlspecialchars($habit['habit_description']  ?? '') ?></td>
+                          <td><?= htmlspecialchars($habit['habit_frequency']  ?? '') ?></td>
+                          <td><?= htmlspecialchars($habit['habit_currentstreak']  ?? '') ?></td>
+                      </tr>
+                      
+                 <?php endforeach; ?>
+                   
+                  </tbody>
+                </table>
+
+
               </div>
             </div>                    
           </div> <!-- todays Habits -->

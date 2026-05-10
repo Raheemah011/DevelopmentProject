@@ -294,7 +294,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
 </style>
 
 
-<body>
+<body onload="loadChart()">
 
   <div class="container-fluid">
         
@@ -433,10 +433,81 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
     
       </div> <!-- Col-10 -->
           
+      <div class="row">
+        <div class="col-2">
+        </div>
+        <div class="col-3">
+          
+          <canvas id="myChart"></canvas>
+        
+        </div>
+      
+      </div>          
     </div> <!-- Main row -->
       
   </div> <!-- container-fluid -->
 
 
 </body>
+
+
+  <?php
+    //prepare SQL query to get all tasks for the logged in user
+    $stmt = $pdo->prepare(" 
+        SELECT * FROM task where user_id = ?
+    ");
+
+    //execute the query using the logged in users id
+    $stmt->execute([
+        $user["user_id"]
+    ]);
+
+    //fetch all tasks from the database and store them in an array
+    $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $lowPriority = 0;
+    $mediumPriority = 0;
+    $highPriority = 0;
+    
+    foreach ($tasks as $task): //this runs through every task in our returned data
+     if ($task['task_priority'] == "1") {
+       $lowPriority = $lowPriority + 1;
+     }
+     else if ($task['task_priority'] == "2") {
+       $mediumPriority = $mediumPriority + 1;
+     }
+     else {
+       $highPriority = $highPriority + 1;
+     }
+
+    endforeach;
+  ?>
+
+
+<script>
+     
+  function loadChart() {
+
+    const arrayLabels = ["Low", "Medium", "High"];
+    const arrayValues = [<?php echo $lowPriority?>, <?php echo $mediumPriority?>, <?php echo $highPriority?>];
+    const ctx = document.getElementById('myChart');
+
+    new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: arrayLabels,
+        datasets: [{
+          label: 'Task Priorites',
+          data: arrayValues,
+          backgroundColor: ["green", "orange", "red"],
+          borderWidth: 1
+        }]
+      }
+    });
+  }
+</script>
+
+
+
+
 </html>
