@@ -328,6 +328,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
                       <th>Date Done</th>
                       <th>Current</th>
                       <th>Best</th>
+                      <th></th>
                   </tr>
               </thead>
               

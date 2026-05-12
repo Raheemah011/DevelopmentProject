@@ -15,8 +15,11 @@ $task_priority = "";
 $task_id_passedin = null;
 
 if ($_SERVER["REQUEST_METHOD"] === "GET") { //runs if the user enters the page for first time. Check if a task was passed in and show its details. otherwise its a new task being added
-  $task_id_passedin = $_GET['task_id'];
 
+  if (isset($_GET['task_id'])) {
+    $task_id_passedin = $_GET['task_id'];
+  }
+  
   if (!empty($task_id_passedin)) {
     try {
         //I use the task id and userid of the logged in persion to get the task, otherwise anyone could pass in any task id and edit that!!!
@@ -53,7 +56,7 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") { //runs if the user enters the page f
 if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the form 
 
     //retrive the task id if it was passed in. When the page is first loaded, if passed in, it is saved to the form as a hidden field so it can be read when the form is posted
-    $task_id_passedin = $_POST["task_id"]; //empty means a new task is being edited 
+    $task_id_passedin = $_POST["task_id_passedin"]; //empty means a new task is being edited 
     
     $delete = $_POST["DeleteButton"];
     
@@ -215,7 +218,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
         
           <form method="POST">
               <!-- if a task id is passed in, then save it in a hidden field so this can be used to find the task again -->
-              <input type="hidden" id="task_id" name="task_id" value="<?= $task_id_passedin ?>" >
+              <input type="hidden" id="task_id_passedin" name="task_id_passedin" value="<?= $task_id_passedin ?>" >
               
               <div class="mb-3">
                   <label for="task_name" class="form-label">Task Name (required)</label>

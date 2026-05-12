@@ -11,9 +11,104 @@ $error = ""; //stores error messages
 $habit_name = "";
 $habit_description = "";
 $habit_frequency = "";
+$habit_id_passedin = "";
 
+if ($_SERVER["REQUEST_METHOD"] === "GET") { //runs if the user loads  the page for the first time
+  
+  if (isset($_GET['habit_id'])) {
+    $habit_id_passedin = $_GET['habit_id'];
+  }
+     
+  if (!empty($habit_id_passedin)) {
+    try {
+        //I use the task id and userid of the logged in persion to get the task, otherwise anyone could pass in any task id and edit that!!!
+        $stmt = $pdo->prepare("
+            SELECT * from habit where habit_id = ? and user_id = ?
+        ");
+        
+        $stmt->execute([
+            $habit_id_passedin ,
+            $user["user_id"]
+        ]);
+        
+      //use fetch to get this one record from the database
+      $habit = $stmt->fetch(PDO::FETCH_ASSOC);
+
+     }
+      catch (PDOException $e) {
+
+        // For debugging, this will write an error to the PHP log file 
+        error_log($e->getMessage());
+        $error = "An error occured. Please check task id and try again.";
+      }      
+      
+      if (!empty($habit)) {
+        $habit_name = $habit["habit_name"]; 
+        $habit_description = $habit["habit_description"];
+        $habit_frequency = $habit["habit_frequency"];    
+      }
+    
+  }
+}
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the form 
+
+    //retrive the habit id if it was passed in. When the page is first loaded, if passed in, it is saved to the form as a hidden field so it can be read when the form is posted
+    $habit_id_passedin = $_POST["habit_id_passedin"]; //empty means a new habit is being addded
+    
+    $delete = $_POST["DeleteButton"];
+    
+    if (!empty($delete)) {
+  
+        //future implementation would be to delete the logs and habits as a single transaction
+        try {
+          //task_id is created automatically
+          $stmt = $pdo->prepare("
+              DELETE from habitlog where habit_id = ?  and user_id = ?
+          ");
+          
+          $stmt->execute([
+              $habit_id_passedin,
+              $user["user_id"]
+          ]);
+
+        }
+        catch (PDOException $e) {
+
+          // For debugging, this will write an error to the PHP log file 
+          error_log($e->getMessage());
+          $error = "An error occured. Please check your details and try again.";
+        }      
+   
+        //if there wasnt any error deleting the logs then also delete the actual habit
+        if (empty($error)) {
+          try {
+            //task_id is created automatically
+            $stmt = $pdo->prepare("
+                DELETE from habit where habit_id = ?  and user_id = ?
+            ");
+            
+            $stmt->execute([
+                $habit_id_passedin,
+                $user["user_id"]
+            ]);
+
+          }
+          catch (PDOException $e) {
+
+            // For debugging, this will write an error to the PHP log file 
+            error_log($e->getMessage());
+            $error = "An error occured. Please check your details and try again.";
+          }      
+        }
+
+      //take the user to the login home page
+      header("Location: habits.php");
+      
+      //exit - no more processing is needed
+      exit();
+  
+    }
     
     //retrieves the values the user entered in the form
     $habit_name = $_POST["habit_name"]; 
@@ -36,38 +131,76 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
     
     //if no error is recorded then create the habit
     if (empty($error)) {
+
+      if (empty($habit_id_passedin)) {                
+        try {
+          //habit_id is created automatically
+          $stmt = $pdo->prepare("
+              INSERT INTO habit (user_id, habit_name, habit_description, habit_frequency)
+              VALUES (?, ?, ?, ?)
+          ");
+          
+          $stmt->execute([
+              $user["user_id"],
+              $habit_name,
+              $habit_description,
+              $habit_frequency
+          ]);
+
+          //take the user to the login home page
+          header("Location: habits.php");
+          
+          //exit - no more processing is needed
+          exit();
+
+        }
+        catch (PDOException $e) {
+
+          // For debugging, this will write an error to the PHP log file 
+          error_log($e->getMessage());
+          $error = "An error occured. Please check your details and try again.";
+        }      
       
-      try {
-        //habit_id is created automatically
-        $stmt = $pdo->prepare("
-            INSERT INTO habit (user_id, habit_name, habit_description, habit_frequency)
-            VALUES (?, ?, ?, ?)
-        ");
-        
-        $stmt->execute([
-            $user["user_id"],
-            $habit_name,
-            $habit_description,
-            $habit_frequency
-        ]);
+      } //empty($habit_id_passedin)
 
-        //take the user to the login home page
-        header("Location: habits.php");
-        
-        //exit - no more processing is needed
-        exit();
+      //if habit_id_passedin is not empty then we are editing an existing habit
+      if (!empty($habit_id_passedin)) {                
+        try {
+          //habit_id is created automatically
+          $stmt = $pdo->prepare("
+              UPDATE habit SET  habit_name = ?, habit_description = ?, habit_frequency = ?
+              WHERE  habit_id = ?
+              AND    user_id = ?
+          ");
+          
+          $stmt->execute([
+              $habit_name,
+              $habit_description,
+              $habit_frequency,
+              $habit_id_passedin,
+              $user["user_id"]
+          ]);
 
-      }
-      catch (PDOException $e) {
+          //take the user to the login home page
+          header("Location: habits.php");
+          
+          //exit - no more processing is needed
+          exit();
 
-        // For debugging, this will write an error to the PHP log file 
-        error_log($e->getMessage());
-        $error = "An error occured. Please check your details and try again.";
-      }      
+        }
+        catch (PDOException $e) {
+
+          // For debugging, this will write an error to the PHP log file 
+          error_log($e->getMessage());
+          $error = "An error occured. Please check your details and try again.";
+        }      
+      
+      } //empty($habit_id_passedin)
+
+      
     } //(empty($error))  so save the data    
     
-    
-}
+} //post
       
 ?>
 
@@ -95,6 +228,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
           <?php endif; ?>
         
           <form method="POST">
+
+              <!-- if a habit id is passed in, then save it in a hidden field so this can be used to find the habit again -->
+              <input type="hidden" id="habit_id_passedin" name="habit_id_passedin" value="<?= $habit_id_passedin ?>" >              
               
               <div class="mb-3">
                   <label for="habit_name" class="form-label">Habit Name (required)</label>
@@ -121,7 +257,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
 
               <div class="mt-3">
                   <button type="submit" class="btn btn-primary">Save habit</button>
-                  <button type="reset" class="btn btn-outline-secondary">Clear</button>
+                  
+                  <?php if (empty($habit_id_passedin)) { ?>
+                      <button type="reset" class="btn btn-outline-secondary">Clear</button>
+                  <?php } ?>      
+                  
+                  <?php if (!empty($habit_id_passedin)) { ?>
+                      <button  name="DeleteButton" value="Delete" onclick="return checkDeleteOK()" class="btn btn-outline-danger">Delete</button>
+                  <?php } ?>      
+                  
+
               </div>
 
           </form>          
@@ -138,4 +283,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //runs if the user submitted the fo
 
 
 </body>
+
+
+<script>
+  
+  function checkDeleteOK() {    
+    var answer = confirm("Are you sure you want to delete this habit and all associated habit activity?"); //confirm is a yes-no alert box and this will give a true or false
+    return answer; //returning false will automatically cancel the button click so wont delete the task
+  }
+  
+</script>
+
+
 </html>
