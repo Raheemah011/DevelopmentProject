@@ -104,10 +104,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") { //checks if the suer submitted the 
 
             <form method="POST">
               <div class="mb-3">
-                <input type="text" name="emailaddress" id="emailaddress" class="form-control" placeholder="Email Address" value="Raheemah@hotmail.com" required>
+                <input type="text" name="emailaddress" id="emailaddress" class="form-control" placeholder="Email Address" required>
               </div>
               <div class="mb-3">
-                <input type="password" name="password" id="password" class="form-control" placeholder="Password" value="password123" required>
+                <input type="password" name="password" id="password" class="form-control" placeholder="Password" required>
               </div>
               <div class="d-grid">
                 <button class="btn btn-primary">Login</button>

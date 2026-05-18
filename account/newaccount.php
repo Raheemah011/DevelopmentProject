@@ -218,29 +218,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
               <div class="mb-3">
                 <label for="Name" class="form-label">Name</label>
-                <input type="text" name="name" id="name" class="form-control" required value="Raheemah">
+                <input type="text" name="name" id="name" class="form-control" required>
               </div>
 
 
               <div class="mb-3">
                 <label for="dateofbirth" class="form-label">Date of Birth</label>
-                <input type="date" name="dateofbirth" id="dateofbirth" class="form-control" required value="1999-01-01">
+                <input type="date" name="dateofbirth" id="dateofbirth" class="form-control" required>
                 <p class="small"> Your date of birth is used if you need to reset your password</p>
               </div>
 
               <div class="mb-3">
                 <label for="emailaddress" class="form-label">Email Address</label>
-                <input type="email" name="emailaddress" id="emailaddress" class="form-control" required value="Raheemah@hotmail.com">
+                <input type="email" name="emailaddress" id="emailaddress" class="form-control" required>
               </div>
 
               <div class="mb-3">
                 <label for="password" class="form-label">Password</label>
-                <input type="password" name="password" id="password" class="form-control" required value="Raheemah1?">
+                <input type="password" name="password" id="password" class="form-control" required>
               </div>
 
               <div class="mb-3">
                 <label for="confirmpassword" class="form-label">Confirm Password</label>
-                <input type="password" name="confirmpassword" id="confirmpassword" class="form-control" required value="Raheemah1?">
+                <input type="password" name="confirmpassword" id="confirmpassword" class="form-control" required>
                 <p class="small"> 
                  Password rules: <br>
                  8 characters <br>

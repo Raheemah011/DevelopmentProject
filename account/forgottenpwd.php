@@ -145,12 +145,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") { //submits users form using the post 
 
               <div class="mb-3">
                 <label for="emailaddress" class="form-label">Email Address</label>
-                <input type="email" name="emailaddress" id="emailaddress" class="form-control" required value="Raheemah@hotmail.com">
+                <input type="email" name="emailaddress" id="emailaddress" class="form-control" required>
               </div>
 
               <div class="mb-3">
                 <label for="dateofbirth" class="form-label">Date of Birth</label>
-                <input type="date" name="dateofbirth" id="dateofbirth" class="form-control" required value="1999-01-01">
+                <input type="date" name="dateofbirth" id="dateofbirth" class="form-control" required>
               </div>
               
               <div class="d-grid mb-4">

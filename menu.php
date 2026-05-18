@@ -1,3 +1,10 @@
+<style>
+.menu {
+  text-decoration: none; 
+}
+
+</style>
+
 <div class="row">
   <div class="col">
     <img src="/files/logo.png" style="height:150px" alt="Logo" class="img-fluid ms-2 d-block mb-4">            
@@ -11,45 +18,39 @@
       <div class="col">
       <span >⚡</span>
         <!-- a tags are anchor tags that can be clicked to go to another page -->
-        <a href="dashboard.php">DashBoard</a>
+        <a class="menu" href="dashboard.php">DashBoard</a>
       </div>
     </div>
 
     <div class="row mt-3 ms-2">
       <div class="col">
         <span >✅</span>
-        <a href="tasks.php">Tasks</a>
+        <a class="menu" href="tasks.php">Tasks</a>
       </div>
     </div>
     
     <div class="row mt-3 ms-2">
       <div class="col">
         <span >🔥</span>
-        <a href="habits.php">Habits</a>
+        <a class="menu" href="habits.php">Habits</a>
       </div>
     </div>
     
     <div class="row mt-3 ms-2">
       <div class="col">
         <span >📈</span>
-        Analystics
+        <a class="menu" href="analytics.php">Analytics</a>
       </div>
     </div>
     
+    <!---    
     <div class="row mt-3 ms-2">
       <div class="col">
         <span >🏆</span>
-        Badges
+        <a class="menu" href="sql.php">Run Sql (remove)</a>
       </div>
     </div>
-
-    <div class="row mt-3 ms-2">
-      <div class="col">
-        <span >🏆</span>
-        <a href="sql.php">Run Sql (remove)</a>
-      </div>
-    </div>
-
+    -->
     
     <div class="mt-4 ms-2">
       <div class="col">
