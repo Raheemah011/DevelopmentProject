@@ -49,13 +49,13 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") { //runs when users comes into the scr
     foreach ($tasks as $task): //this runs through every task in our returned data
       $taskDone = !empty($task["task_completeddate"]);
       
-      if ($task["task_priority"] = "1") {
+      if ($task["task_priority"] == "1") {
         $taskCountTodayLow = $taskCountTodayLow + 1;  
         if ($taskDone) {
           $taskCountTodayLowDone = $taskCountTodayLowDone + 1;  
         }
       } 
-      else if ($task["task_priority"] = "2") {
+      else if ($task["task_priority"] == "2") {
         $taskCountTodayMedium = $taskCountTodayMedium + 1;  
         if ($taskDone) {
           $taskCountTodayMediumDone = $taskCountTodayMediumDone + 1;  
